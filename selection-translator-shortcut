@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_DIR="/home/minh-quan/projects/selection-translator-linux"
+PYTHON_BIN="$PROJECT_DIR/venv/bin/python"
+LOG_FILE="/tmp/selection-translator.log"
+export YDOTOOL_SOCKET="/tmp/.ydotool_socket"
+
+if [[ ! -x "$PYTHON_BIN" ]]; then
+    PYTHON_BIN="python3"
+fi
+
+{
+    printf '%s DEBUG: Shortcut script started\n' "$(date --iso-8601=seconds)"
+
+    if command -v ydotool >/dev/null 2>&1; then
+        sleep 0.25
+        if ydotool key 29:1 46:1 46:0 29:0; then
+            printf '%s DEBUG: Shortcut script sent Ctrl+C with ydotool\n' "$(date --iso-8601=seconds)"
+        else
+            printf '%s DEBUG: Shortcut script failed to send Ctrl+C with ydotool\n' "$(date --iso-8601=seconds)"
+        fi
+        sleep 0.25
+    else
+        printf '%s DEBUG: ydotool is not installed\n' "$(date --iso-8601=seconds)"
+    fi
+
+    "$PYTHON_BIN" "$PROJECT_DIR/translator.py" --trigger --no-copy
+} >>"$LOG_FILE" 2>&1
