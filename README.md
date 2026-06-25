@@ -1,83 +1,157 @@
-# 🇻🇳 Selection Translator (MacOS)
+# Selection Translator for Linux
 
-**Ứng dụng dịch thuật nhanh chóng trên MacOS cho người Việt.**  
-Không cần copy-paste thủ công, không cần mở Google Dịch. Chỉ cần bôi đen và nhấn phím tắt!
+Ứng dụng dịch nhanh văn bản đang bôi đen trên Linux/Ubuntu. Dự án này được fork từ bản macOS và được điều chỉnh để chạy tốt hơn với Ubuntu Wayland.
 
----
+## Tính năng chính
 
-## 🚀 Tính năng chính
+- Dịch selection hoặc clipboard hiện tại sang tiếng Việt.
+- Hỗ trợ Wayland bằng `wl-paste` từ gói `wl-clipboard`.
+- Hỗ trợ X11 bằng `xclip`.
+- Hiển thị kết quả trong cửa sổ nổi bằng `tkinter`.
+- Phù hợp để gắn vào Ubuntu Custom Keyboard Shortcut.
+- Khi chạy `python3 translator.py`, cửa sổ mở ngay và chờ phím tắt dịch.
 
-- ✅ **Dịch tức thì**: Bôi đen chữ bất kỳ đâu -> Nhấn `Command + Control + S`.
-- ✅ **Giao diện hiện đại**: Cửa sổ kết quả tối giản, hiện ngay cạnh con trỏ chuột.
-- ✅ **Thông minh**: Tự động copy văn bản giúp bạn.
-- ✅ **Tiện lợi**: Cửa sổ luôn nổi (Always on Top) để bạn dễ vừa đọc vừa làm việc.
+## Yêu cầu hệ thống
 
----
+- Ubuntu hoặc distro Linux desktop tương thích.
+- Python 3.9+.
+- `python3-tk` để hiển thị popup.
+- `wl-clipboard` cho Wayland.
+- `xclip` cho X11.
+- `ydotool` để gửi `Ctrl+C` tự động trên Wayland khi dùng keyboard shortcut.
 
-## Tải xuống & Cài đặt
-
-1.  Truy cập mục **[Releases](https://github.com/ch-hnhu/selection_translator_macos/releases)**.
-2.  Tải file `SelectionTranslator.dmg`.
-3.  Mở file `.dmg` vừa tải.
-4.  Kéo **Selection Translator** vào thư mục **Applications** (Ứng dụng).
-
----
-
-## ⚙️ Thiết lập lần đầu (Quan trọng ⚠️)
-
-Vì ứng dụng cần "nghe" phím tắt và "copy" giúp bạn, macOS sẽ hỏi quyền bảo mật. Bạn cần cấp quyền **một lần duy nhất** để app hoạt động trơn tru:
-
-### 1. Cấp quyền Trợ năng (Accessibility)
-
-Để app có thể tự động lấy văn bản bạn đã bôi đen.
-
-- Vào **System Settings** > **Privacy & Security** > **Accessibility**.
-- Tìm **Selection Translator** và tick vào ô checkbox để cấp quyền.
-
-### 2. Cấp quyền Phím tắt (Input Monitoring)
-
-Để app nhận diện được khi bạn nhấn `Command + Control + S`.
-
-- Vào **System Settings** > **Privacy & Security** > **Input Monitoring**.
-- Tìm **Selection Translator** và tick vào ô checkbox để cấp quyền.
-
-> ⚠️ **Lưu ý**: Nếu không tìm thấy ứng dụng, hãy thêm thủ công bằng nút (+).
-
-_(Nếu mở app lên mà không thấy dịch được, hãy kiểm tra lại 2 quyền này!)_
-
----
-
-## 📖 Cách sử dụng
-
-1.  **Bôi đen** đoạn văn bản.
-2.  Nhấn tổ hợp phím: **`Command` + `Control` + `S`**
-3.  Xem kết quả dịch hiện ra ngay bên cạnh!
-
----
-
-<details>
-<summary>Dành cho người muốn tự build app và vọc vạch code</summary>
-
-### Yêu cầu hệ thống:
-
-- **macOS**: Monterey (12.0) trở lên.
-- **Python**: 3.9+ (Gõ `python3 --version` để kiểm tra).
-- **Git**: Đã cài đặt.
-
-### Các bước thực hiện:
+Trên Ubuntu:
 
 ```bash
-git clone https://github.com/ch-hnhu/selection_translator_macos.git
-cd selection_translator_macos
+sudo apt update
+sudo apt install python3 python3-venv python3-tk wl-clipboard xclip ydotool
+```
 
-# Tạo và kích hoạt môi trường ảo (Khuyên dùng)
-python3 -m venv .venv
-source .venv/bin/activate
+Trên Wayland, bật daemon của `ydotool`:
+
+```bash
+sudo systemctl enable --now ydotool
+```
+
+Nếu systemd báo không có service `ydotool`, thử:
+
+```bash
+sudo systemctl enable --now ydotoold
+```
+
+## Cài đặt
+
+```bash
+git clone https://github.com/ch-hnhu/selection-translator-linux.git
+cd selection-translator-linux
+
+python3 -m venv venv
+source venv/bin/activate
 
 pip install -r requirements.txt
+```
+
+## Chạy thử
+
+Kiểm tra popup:
+
+```bash
+python3 translator.py --test-ui
+```
+
+Mở ứng dụng thường trực:
+
+```bash
 python3 translator.py
 ```
 
-**Lưu ý:** Khi chạy bằng code, bạn cần cấp quyền **Accessibility** và **Input Monitoring** cho **Terminal** hoặc VS Code (nơi bạn chạy code) thay vì cho App để có thể hoạt động được.
+Cửa sổ sẽ hiện ngay với hướng dẫn bôi đen văn bản và nhấn `Ctrl + Alt + Y`.
 
-</details>
+Dịch một lần rồi thoát khi đóng popup:
+
+```bash
+python3 translator.py --translate-once
+```
+
+Trước khi chạy lệnh dịch một lần, hãy bôi đen text ở ứng dụng khác hoặc copy text vào clipboard. Trên Wayland, nếu `ydotool` đang chạy, app sẽ gửi `Ctrl+C` trước rồi đọc clipboard bằng `wl-paste`.
+
+Khi dùng Ubuntu shortcut, nên gọi script wrapper để copy selection rồi gửi lệnh dịch tới cửa sổ đang chạy:
+
+```bash
+/home/minh-quan/projects/selection-translator-linux/selection-translator-shortcut
+```
+
+Kiểm tra riêng phần đọc selection:
+
+```bash
+python3 translator.py --debug-selection
+```
+
+Khi chạy bằng keyboard shortcut, log debug được ghi ở:
+
+```bash
+tail -n 50 /tmp/selection-translator.log
+```
+
+## Tạo Ubuntu Keyboard Shortcut
+
+Mở:
+
+```text
+Settings -> Keyboard -> View and Customize Shortcuts -> Custom Shortcuts
+```
+
+Tạo shortcut mới:
+
+```text
+Name: Selection Translator
+Command: /home/minh-quan/projects/selection-translator-linux/selection-translator-shortcut
+Shortcut: Ctrl+Alt+Y
+```
+
+Sau đó bôi đen text ở ứng dụng bất kỳ và nhấn `Ctrl + Alt + Y`. Popup bản dịch sẽ hiện gần con trỏ chuột.
+
+Nếu ứng dụng chưa chạy, script wrapper vẫn mở popup dịch một lần theo selection/clipboard hiện tại.
+
+Có thể cấu hình shortcut bằng lệnh:
+
+```bash
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/selection-translator/']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/selection-translator/ name 'Selection Translator'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/selection-translator/ command '/home/minh-quan/projects/selection-translator-linux/selection-translator-shortcut'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/selection-translator/ binding '<Control><Alt>y'
+```
+
+Kiểm tra GNOME đã nhận shortcut:
+
+```bash
+gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings
+gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/selection-translator/ binding
+```
+
+## Cấu trúc mã nguồn
+
+```text
+translator.py                 # Entry point cho shortcut
+selection_translator/
+  app.py                      # Điều phối đọc selection, dịch và UI
+  clipboard.py                # Đọc Wayland/X11 selection hoặc clipboard
+  config.py                   # Cấu hình chung
+  translator_service.py       # Wrapper deep-translator
+  ui.py                       # Floating panel bằng tkinter
+```
+
+## Phát triển
+
+Kiểm tra cú pháp:
+
+```bash
+python3 -m py_compile translator.py selection_translator/*.py
+```
+
+Coding convention của dự án:
+
+- Dùng 4 spaces cho indentation.
+- Mỗi hàm/method phải có type hint cho tham số và return type.
+- Mỗi hàm/method phải có docstring tiếng Việt theo Google style, gồm `Args` nếu có tham số và `Returns` cho kiểu trả về.
+- Tách logic theo module, không dồn thêm tính năng mới vào `translator.py`.

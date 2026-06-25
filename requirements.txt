@@ -1,6 +1,4 @@
-rumps
-pynput
-pyperclip
-deep-translator
-pyobjc-framework-Cocoa
-certifi
+beautifulsoup4==4.15.0
+deep-translator==1.11.4
+certifi==2026.6.17
+requests==2.34.2
