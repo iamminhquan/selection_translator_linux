@@ -73,8 +73,7 @@ class TranslatorService:
             response.raise_for_status()
         except requests.Timeout as error:
             raise RuntimeError(
-                "Google Translate phản hồi quá chậm. "
-                "Hãy kiểm tra mạng rồi thử lại."
+                "Google Translate phản hồi quá chậm. " "Hãy kiểm tra mạng rồi thử lại."
             ) from error
         except requests.RequestException as error:
             raise RuntimeError(f"Không gọi được Google Translate: {error}") from error

@@ -12,9 +12,7 @@ from selection_translator.translator_service import (
 )
 from selection_translator.ui import TranslationPanel
 
-INSTRUCTION_TEXT = (
-    f"Bôi đen đoạn văn bản và sử dụng phím tắt {SHORTCUT_LABEL} để dịch."
-)
+INSTRUCTION_TEXT = f"Bôi đen đoạn văn bản và sử dụng phím tắt {SHORTCUT_LABEL} để dịch."
 READING_TEXT = "Đang đọc văn bản đã bôi đen..."
 TRANSLATING_TEXT = "Đang dịch..."
 
