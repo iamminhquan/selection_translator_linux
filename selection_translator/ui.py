@@ -1,9 +1,9 @@
 """Cửa sổ nổi hiển thị bản dịch bằng Tkinter."""
 
-from collections.abc import Callable
-from queue import Empty, Queue
 import signal
 import tkinter as tk
+from collections.abc import Callable
+from queue import Empty, Queue
 
 from selection_translator.config import APP_NAME, PANEL_HEIGHT, PANEL_WIDTH
 
