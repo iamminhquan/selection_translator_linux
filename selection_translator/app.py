@@ -1,6 +1,7 @@
 """Điều phối luồng chạy chính của Selection Translator."""
 
 import threading
+from time import perf_counter
 
 from selection_translator.clipboard import read_selected_text
 from selection_translator.config import SHORTCUT_LABEL
@@ -136,7 +137,10 @@ class TranslatorApp:
         """
         print("--- Đang đọc selection/clipboard ---")
         panel = self.get_panel()
+        read_start = perf_counter()
         text = read_selected_text(copy_before_read=copy_before_read)
+        read_elapsed_ms = (perf_counter() - read_start) * 1000
+        log_debug(f"DEBUG: Đọc selection/clipboard sau {read_elapsed_ms:.0f} ms.")
         if not text:
             panel.show(
                 "Không đọc được văn bản.\n\n"
@@ -146,7 +150,12 @@ class TranslatorApp:
             return
 
         try:
+            translate_start = perf_counter()
             translated = self.get_translator().translate(text)
+            translate_elapsed_ms = (perf_counter() - translate_start) * 1000
+            log_debug(
+                f"DEBUG: Dịch đồng bộ hoàn tất sau {translate_elapsed_ms:.0f} ms."
+            )
             if translated.strip() == text.strip():
                 translated = (
                     f"{translated}\n\n"
@@ -174,7 +183,10 @@ class TranslatorApp:
 
         try:
             self._show_message_on_ui(READING_TEXT)
+            read_start = perf_counter()
             text = read_selected_text(copy_before_read=copy_before_read)
+            read_elapsed_ms = (perf_counter() - read_start) * 1000
+            log_debug(f"DEBUG: Đọc selection/clipboard sau {read_elapsed_ms:.0f} ms.")
             if not text:
                 log_debug("DEBUG: Không đọc được text sau khi nhận shortcut.")
                 self._show_message_on_ui(
@@ -186,7 +198,12 @@ class TranslatorApp:
             log_debug(f"DEBUG: Đã đọc text dài {len(text)} ký tự, bắt đầu dịch.")
             self._show_on_ui(TRANSLATING_TEXT, text)
             try:
+                translate_start = perf_counter()
                 translated = self.get_translator().translate(text)
+                translate_elapsed_ms = (perf_counter() - translate_start) * 1000
+                log_debug(
+                    f"DEBUG: Dịch nền hoàn tất sau {translate_elapsed_ms:.0f} ms."
+                )
                 if translated.strip() == text.strip():
                     translated = (
                         f"{translated}\n\n"
