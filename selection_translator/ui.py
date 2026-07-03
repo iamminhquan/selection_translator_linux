@@ -22,9 +22,12 @@ class TranslationPanel:
         self.root.geometry(f"{PANEL_WIDTH}x{PANEL_HEIGHT}")
         self.root.attributes("-topmost", True)
         self.root.protocol("WM_DELETE_WINDOW", self.stop)
+        self.root.bind_all("<Escape>", self._handle_escape)
         self.root.withdraw()
         self.tasks: Queue[Callable[[], None]] = Queue()
         self.stop_callbacks: list[Callable[[], None]] = []
+        self.escape_callback: Callable[[], None] = self.stop
+        self.last_translated_text = ""
 
         self.text = tk.Text(
             self.root,
@@ -40,6 +43,32 @@ class TranslationPanel:
         )
         self.text.pack(fill="both", expand=True)
 
+        self.actions = tk.Frame(self.root, bg="#111827")
+        self.actions.pack(fill="x")
+
+        self.copy_button = tk.Button(
+            self.actions,
+            text="Copy bản dịch",
+            command=self.copy_translation,
+            bg="#2563eb",
+            fg="#ffffff",
+            activebackground="#1d4ed8",
+            activeforeground="#ffffff",
+            relief="flat",
+            padx=12,
+            pady=6,
+        )
+        self.copy_button.pack(side="left", padx=10, pady=8)
+
+        self.status_label = tk.Label(
+            self.actions,
+            text="",
+            bg="#111827",
+            fg="#cbd5e1",
+            anchor="w",
+        )
+        self.status_label.pack(side="left", fill="x", expand=True, padx=(0, 10))
+
     def show(self, translated_text: str, original_text: str = "") -> None:
         """Hiển thị bản dịch và nội dung gốc gần vị trí con trỏ.
 
@@ -53,6 +82,10 @@ class TranslationPanel:
         content = f"BẢN DỊCH:\n{translated_text}"
         if original_text:
             content += f"\n\nNỘI DUNG GỐC:\n{original_text}"
+
+        self.last_translated_text = translated_text
+        self.status_label.configure(text="")
+        self.copy_button.configure(state="normal")
 
         self.text.configure(state="normal")
         self.text.delete("1.0", tk.END)
@@ -82,6 +115,10 @@ class TranslationPanel:
         Returns:
             None: Hàm cập nhật UI và không trả về giá trị.
         """
+        self.last_translated_text = ""
+        self.status_label.configure(text="")
+        self.copy_button.configure(state="disabled")
+
         self.text.configure(state="normal")
         self.text.delete("1.0", tk.END)
         self.text.insert(tk.END, message)
@@ -89,6 +126,21 @@ class TranslationPanel:
 
         self.root.deiconify()
         self.root.lift()
+
+    def copy_translation(self) -> None:
+        """Copy bản dịch gần nhất vào clipboard hệ thống.
+
+        Returns:
+            None: Hàm cập nhật clipboard và trạng thái UI.
+        """
+        if not self.last_translated_text:
+            self.status_label.configure(text="Chưa có bản dịch để copy.")
+            return
+
+        self.root.clipboard_clear()
+        self.root.clipboard_append(self.last_translated_text)
+        self.root.update()
+        self.status_label.configure(text="Đã copy bản dịch.")
 
     def hide(self) -> None:
         """Ẩn cửa sổ bản dịch.
@@ -131,6 +183,17 @@ class TranslationPanel:
         """
         self.stop_callbacks.append(callback)
 
+    def on_escape(self, callback: Callable[[], None]) -> None:
+        """Đăng ký hành động khi người dùng nhấn phím Escape.
+
+        Args:
+            callback (Callable[[], None]): Hàm cần gọi khi nhấn Escape.
+
+        Returns:
+            None: Hàm chỉ lưu callback và không trả về giá trị.
+        """
+        self.escape_callback = callback
+
     def schedule(self, callback: Callable[[], None]) -> None:
         """Đưa callback vào hàng đợi chạy trên UI thread.
 
@@ -165,6 +228,17 @@ class TranslationPanel:
             callback()
 
         self.root.after(50, self._poll_tasks)
+
+    def _handle_escape(self, event: tk.Event) -> None:
+        """Chạy hành động đã đăng ký khi người dùng nhấn phím Escape.
+
+        Args:
+            event (tk.Event): Sự kiện bàn phím từ Tkinter.
+
+        Returns:
+            None: Hàm gọi callback và không trả về giá trị.
+        """
+        self.escape_callback()
 
     def _handle_sigint(self, signum: int, frame: object | None) -> None:
         """Xử lý tín hiệu `Ctrl+C` từ terminal.

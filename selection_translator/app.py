@@ -75,6 +75,7 @@ class TranslatorApp:
             None: Hàm chạy event loop và không trả về giá trị.
         """
         panel = self.get_panel()
+        panel.on_escape(panel.hide)
         panel.show_message(INSTRUCTION_TEXT)
         self.trigger_server = TriggerServer(self.translate_from_shortcut)
         self.trigger_server.start()
