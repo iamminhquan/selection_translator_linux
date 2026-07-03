@@ -5,7 +5,13 @@ import tkinter as tk
 from collections.abc import Callable
 from queue import Empty, Queue
 
-from selection_translator.config import APP_NAME, PANEL_HEIGHT, PANEL_WIDTH
+from selection_translator.config import (
+    APP_NAME,
+    PANEL_HEIGHT,
+    PANEL_MIN_HEIGHT,
+    PANEL_MIN_WIDTH,
+    PANEL_WIDTH,
+)
 
 
 class TranslationPanel:
@@ -20,6 +26,7 @@ class TranslationPanel:
         self.root = tk.Tk()
         self.root.title(APP_NAME)
         self.root.geometry(f"{PANEL_WIDTH}x{PANEL_HEIGHT}")
+        self.root.minsize(PANEL_MIN_WIDTH, PANEL_MIN_HEIGHT)
         self.root.attributes("-topmost", True)
         self.root.protocol("WM_DELETE_WINDOW", self.stop)
         self.root.bind_all("<Escape>", self._handle_escape)
@@ -29,22 +36,8 @@ class TranslationPanel:
         self.escape_callback: Callable[[], None] = self.stop
         self.last_translated_text = ""
 
-        self.text = tk.Text(
-            self.root,
-            wrap="word",
-            bg="#1f2933",
-            fg="#f8fafc",
-            insertbackground="#f8fafc",
-            relief="flat",
-            padx=12,
-            pady=12,
-            font=("Sans", 12),
-            exportselection=False,
-        )
-        self.text.pack(fill="both", expand=True)
-
         self.actions = tk.Frame(self.root, bg="#111827")
-        self.actions.pack(fill="x")
+        self.actions.pack(side="bottom", fill="x")
 
         self.copy_button = tk.Button(
             self.actions,
@@ -68,6 +61,20 @@ class TranslationPanel:
             anchor="w",
         )
         self.status_label.pack(side="left", fill="x", expand=True, padx=(0, 10))
+
+        self.text = tk.Text(
+            self.root,
+            wrap="word",
+            bg="#1f2933",
+            fg="#f8fafc",
+            insertbackground="#f8fafc",
+            relief="flat",
+            padx=12,
+            pady=12,
+            font=("Sans", 12),
+            exportselection=False,
+        )
+        self.text.pack(side="top", fill="both", expand=True)
 
     def show(self, translated_text: str, original_text: str = "") -> None:
         """Hiển thị bản dịch và nội dung gốc gần vị trí con trỏ.
@@ -96,13 +103,15 @@ class TranslationPanel:
         pointer_y = self.root.winfo_pointery()
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
+        panel_width = min(PANEL_WIDTH, max(PANEL_MIN_WIDTH, screen_width - 40))
+        panel_height = min(PANEL_HEIGHT, max(PANEL_MIN_HEIGHT, screen_height - 80))
 
-        x = min(pointer_x + 20, screen_width - PANEL_WIDTH - 20)
-        y = min(pointer_y + 20, screen_height - PANEL_HEIGHT - 60)
+        x = min(pointer_x + 20, screen_width - panel_width - 20)
+        y = min(pointer_y + 20, screen_height - panel_height - 60)
         x = max(x, 20)
         y = max(y, 20)
 
-        self.root.geometry(f"{PANEL_WIDTH}x{PANEL_HEIGHT}+{x}+{y}")
+        self.root.geometry(f"{panel_width}x{panel_height}+{x}+{y}")
         self.root.deiconify()
         self.root.lift()
 
